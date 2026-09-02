@@ -275,22 +275,21 @@ function procesarMensaje(ws, mensaje) {
       break;
     }
 
-    // 6. COMANDO REMOTO DE RESOLUCIÓN (De Visor Web a Emisor Móvil)
+    // 6. COMANDO REMOTO DE RESOLUCIÓN (Bidireccional: Web <-> Móvil)
     case 'comando-resolucion': {
       if (!ws.salaId) return;
       const sala = salas.get(ws.salaId);
       if (!sala) return;
 
       console.log(`[COMANDO RESOLUCIÓN] De ${ws.clienteId} (${ws.rol}) en sala "${ws.salaId}": ${mensaje.resolucionId}`);
-      sala.emisores.forEach((emisor) => {
-        if (emisor.readyState === WebSocket.OPEN) {
-          emisor.send(JSON.stringify({
-            tipo: 'comando-resolucion',
-            resolucionId: mensaje.resolucionId,
-            remitenteId: ws.clienteId,
-          }));
-        }
-      });
+      difundirASala(ws.salaId, {
+        tipo: 'comando-resolucion',
+        resolucionId: mensaje.resolucionId,
+        ancho: mensaje.ancho,
+        alto: mensaje.alto,
+        fps: mensaje.fps,
+        remitenteId: ws.clienteId,
+      }, ws.clienteId);
       break;
     }
 
